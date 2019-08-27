@@ -16,7 +16,7 @@ ui = H.mkComponent
 
 type State = Int
 
-type Slot = H.Slot
+type Slot = H.Slot (Const Unit) Void
 
 initialState :: Int
 initialState = 0

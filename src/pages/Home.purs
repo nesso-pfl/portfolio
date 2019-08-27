@@ -1,5 +1,6 @@
 module Home where
 
+import Control.Monad.State as S
 import Data.Const (Const)
 import Effect.Aff (Aff)
 import Halogen as H
@@ -11,17 +12,17 @@ ui :: H.Component HH.HTML (Const Unit) Unit Void Aff
 ui = H.mkComponent
     { initialState: const unit
     , render
-    , eval: H.mkEval H.defaultEval
+    , eval: H.mkEval $ H.defaultEval
     }
 
-type State = Int
+data Action
+    = Hoho
 
-type Slot = H.Slot
+type Slot = H.Slot (Const Unit) Void
 
-initialState :: Int
-initialState = 0
-
-render :: Unit -> H.ComponentHTML Unit () Aff
-render _ =
+render :: Unit -> H.ComponentHTML Action () Aff
+render st =
     HH.div_
-        [ HH.h1_ [ HH.text "Home" ] ]
+        [ HH.h1_ [ HH.text "Home" ]
+        , HH.h1_ [ HH.text $ show st]
+        ]

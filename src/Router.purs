@@ -5,24 +5,32 @@ import Blog as Blog
 
 import Control.Alt ((<|>))
 import Data.Const (Const)
+import Data.Maybe (Maybe)
 import Data.Symbol (SProxy(..))
-import Effect.Aff (Aff)
+import Effect (Effect)
+import Effect.Aff (Aff, launchAff)
+import Effect.Class (liftEffect)
+import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Properties as HP
 import Prelude
+import Routing.Hash (matches)
 import Routing.Match (Match, lit)
 
+data Input a
+    = Goto Routes a
 
 data Routes
     = Home
     | Blog
 
-data Action
+data Query
     = ChangeRoute Routes
 
 type Slot =
-    ( home :: Home.Slot 
-    , blog :: Blog.Slot
+    ( home :: Home.Slot Unit
+    , blog :: Blog.Slot Unit
     )
 
 _home = SProxy :: SProxy "home"
@@ -33,8 +41,8 @@ type State =
     }
 
 
-initialState :: State
-initialState =
+initialState :: forall i. i -> State
+initialState _ =
     { currentPage: "Home"
     }
 
@@ -43,32 +51,44 @@ routing = Home <$ lit ""
       <|> Blog <$ lit "" <* lit "blog"
 
 
-ui :: forall i o m. H.Component HH.HTML i o m
+ui :: forall q. H.Component HH.HTML q Unit Unit Aff
 ui = H.mkComponent
     { initialState
     , render
     , eval: H.mkEval $ H.defaultEval
-        { handleAction: handleAction
+        { handleQuery = handleQuery
         }
     }
 
 
-render :: State -> H.ComponentHTML Action Slot Aff
+render :: State -> H.ComponentHTML Unit Slot Aff
 render st =
     HH.div_
-        [ HH.h1_ [ HH.text "どうも" ]
+        [ HH.h1_ [ HH.text $ "どうも、" <> st.currentPage ]
+        , HH.a [ HP.href "/home"] [ HH.text "リンク" ]
         , view st.currentPage
         ]
 
     where
-        view :: String -> H.ComponentHTML Action Slot Aff
+        view :: String -> H.ComponentHTML Unit Slot Aff
         view "home" = HH.slot _home unit Home.ui unit absurd
         view "blog" = HH.slot _blog unit Blog.ui unit absurd
         view _ = HH.div_ []
 
--- handleAction :: forall o m. Action -> H.HalogenM State Action Slot o m Unit
-handleAction = case _ of
+-- handleQuery :: forall a. query a -> HalogenM state action slots output m (Maybe a)
+handleQuery :: forall a. Query a -> H.HalogenM State Query Slot Unit Aff (Maybe a)
+handleQuery = case _ of
     ChangeRoute Home -> do
        H.modify_ (_ { currentPage = "home" })
     ChangeRoute Blog -> do
        H.modify_ (_ { currentPage = "blog" })
+
+-- routeSignal :: H.HalogenIO (Const Unit) Void Aff -> Aff (Effect Unit)
+routeSignal :: H.HalogenIO Input Unit Aff -> Aff (Effect Unit)
+routeSignal driver = liftEffect do
+    matches routing hashChanged
+    where
+        hashChanged _ newRoute = do
+           launchAff $ driver.query <<< H.tell <<< Goto $ newRoute
+           pure unit
+

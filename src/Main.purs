@@ -1,9 +1,10 @@
 module Main where
 
-import Router as Router
+import Router as R
 
 import Prelude
 import Effect (Effect)
+import Effect.Aff (forkAff)
 import Halogen.Aff as HA
 import Halogen.VDom.Driver (runUI)
 
@@ -11,4 +12,5 @@ import Halogen.VDom.Driver (runUI)
 main :: Effect Unit
 main = HA.runHalogenAff do
     body <- HA.awaitBody
-    runUI Router.ui unit body
+    driver <- runUI R.ui unit body
+    forkAff $ R.routeSignal driver
