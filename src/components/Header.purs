@@ -41,7 +41,9 @@ ui = H.mkComponent
 
 render :: forall s. Unit -> H.ComponentHTML Action s Aff
 render _ =
-    HH.header [ HP.class_ $ ClassName "header" ] headerContents
+    HH.header [ HP.class_ $ ClassName "header" ]
+        (headerContents
+     <> [ HH.link [ HP.href "/assets/sass/header.sass" ] ])
     where headerContents :: forall p. Array (HH.HTML p Action)
           headerContents = contents # map \c -> HH.div
               [ HP.classes [ ClassName "content"

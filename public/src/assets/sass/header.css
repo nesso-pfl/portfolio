@@ -1,0 +1,11 @@
+.header {
+  display: flex;
+  justify-content: flex-end;
+}
+.header .content {
+  border-bottom: 1px solid black;
+  height: 5vh;
+  width: 10vw;
+}
+
+/*# sourceMappingURL=/header.css.map */
