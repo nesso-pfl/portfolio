@@ -1,10 +1,14 @@
 module Router where
 
+import Header as Header
 import Home as Home
 import Blog as Blog
+import Biography as Biography
+import Budo as Budo
+import Knowledge as Knowledge
+import Products as Products
 
 import Control.Alt ((<|>))
-import Data.Const (Const)
 import Data.Maybe (Maybe(..))
 import Data.Symbol (SProxy(..))
 import Effect (Effect)
@@ -14,46 +18,71 @@ import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import Halogen.HTML.Events as HE
 import Prelude
-import Routing.Hash (matches)
 import Routing.Match (Match, lit)
-import Routing.PushState (LocationState)
 
 data Routes
     = Home
     | Blog
+    | Budo
+    | Biography
+    | Knowledge
+    | Products
+
+instance showRoutes :: Show Routes where
+  show Home = "Home"
+  show Blog = "Blog"
+  show Biography = "Biography"
+  show Budo = "Budo"
+  show Knowledge = "Knowledge"
+  show Products = "Products"
 
 data Action
-    = ChangeRoute Routes
+    = ChangeRoute String
 
 data Query a 
-    = PushRoute LocationState a
+    = ListenRoute Routes a
+
+type Message = String
 
 type Slot =
-    ( home :: Home.Slot Unit
+    ( header :: Header.Slot Unit
+    , home :: Home.Slot Unit
     , blog :: Blog.Slot Unit
+    , biography :: Biography.Slot Unit
+    , budo :: Budo.Slot Unit
+    , knowledge :: Knowledge.Slot Unit
+    , products :: Products.Slot Unit
     )
 
+_header = SProxy :: SProxy "header"
 _home = SProxy :: SProxy "home"
 _blog = SProxy :: SProxy "blog"
+_biography = SProxy :: SProxy "biography"
+_budo = SProxy :: SProxy "budo"
+_knowledge = SProxy :: SProxy "knowledge"
+_products = SProxy :: SProxy "products"
 
 type State = 
-    { currentPage :: String
+    { currentPage :: Routes
     }
 
-type Input = String
-
-initialState :: Input -> State
-initialState i =
-    { currentPage: i
+initialState :: Unit -> State
+initialState _ =
+    { currentPage: Home
     }
 
 routing :: Match Routes
-routing = Home <$ lit ""
-      <|> Blog <$ lit "" <* lit "blog"
+routing = Blog <$ lit "" <* lit "blog"
+      <|> Biography <$ lit "" <* lit "biography"
+      <|> Budo <$ lit "" <* lit "budo"
+      <|> Products <$ lit "" <* lit "products"
+      <|> Knowledge <$ lit "" <* lit "knowledge"
+      <|> Home <$ lit ""
 
 
-ui :: H.Component HH.HTML Query Input Unit Aff
+ui :: H.Component HH.HTML Query Unit Message Aff
 ui = H.mkComponent
     { initialState
     , render
@@ -67,39 +96,31 @@ ui = H.mkComponent
 render :: State -> H.ComponentHTML Action Slot Aff
 render st =
     HH.div_
-        [ HH.h1_ [ HH.text $ "どうも、" <> st.currentPage ]
-        , HH.div_ [ HH.a [ HP.href "/home"] [ HH.text "to home" ] ]
-        , HH.div_ [ HH.a [ HP.href "/blog"] [ HH.text "to blog" ] ]
+        [ HH.slot _header unit Header.ui unit \msg -> Just $ ChangeRoute msg
         , view st.currentPage
         ]
 
     where
-        view :: String -> H.ComponentHTML Action Slot Aff
-        view "home" = HH.slot _home unit Home.ui unit absurd
-        view "blog" = HH.slot _blog unit Blog.ui unit absurd
-        view _ = HH.div_ []
+        view :: Routes -> H.ComponentHTML Action Slot Aff
+        view Home = HH.slot _home unit Home.ui unit absurd
+        view Blog = HH.slot _blog unit Blog.ui unit absurd
+        view Biography = HH.slot _biography unit Biography.ui unit absurd
+        view Budo = HH.slot _budo unit Budo.ui unit absurd
+        view Knowledge = HH.slot _knowledge unit Knowledge.ui unit absurd
+        view Products = HH.slot _products unit Products.ui unit absurd
 
-handleAction :: Action -> H.HalogenM State Action Slot Unit Aff Unit
+handleAction :: Action -> H.HalogenM State Action Slot Message Aff Unit
 handleAction = case _ of
-    ChangeRoute Home -> do
-       H.modify_ (_ { currentPage = "home" })
-    ChangeRoute Blog -> do
-       H.modify_ (_ { currentPage = "blog" })
+    ChangeRoute s -> do
+        H.raise s
 
-handleQuery :: forall a. Query a -> H.HalogenM State Action Slot Unit Aff (Maybe a)
+handleQuery :: forall a. Query a -> H.HalogenM State Action Slot Message Aff (Maybe a)
 handleQuery = case _ of
-    PushRoute ls a -> do
-        H.modify_ (_ { currentPage = ls.path })
-        pure unit
+    ListenRoute r a -> do
+        H.modify_ (_ { currentPage = r })
+        pure Nothing
 
-listen driver ls = do
-    _ <- launchAff $ driver.query $ H.tell (PushRoute ls)
+listenRoute :: H.HalogenIO Query Message Aff -> Maybe Routes -> Routes -> Effect Unit
+listenRoute io _ newRoute = do
+    _ <- launchAff <<< io.query <<< H.tell <<< ListenRoute $ newRoute
     pure unit
--- routeSignal :: H.HalogenIO (Const Unit) Void Aff -> Aff (Effect Unit)
--- routeSignal :: H.HalogenIO Input Unit Aff -> Aff (Effect Unit)
--- routeSignal driver = liftEffect do
-    -- matches routing hashChanged
-    -- where
-        -- hashChanged _ newRoute = do
-           -- launchAff $ driver.query <<< H.tell <<< Goto $ newRoute
-           -- pure unit
