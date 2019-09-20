@@ -1,4 +1,4 @@
-module Products where
+module Page.Products where
 
 import Control.Monad.State as S
 import Data.Const (Const)

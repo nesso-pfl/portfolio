@@ -1,4 +1,4 @@
-module Biography where
+module Page.Biography where
 
 import Control.Monad.State as S
 import Data.Const (Const)

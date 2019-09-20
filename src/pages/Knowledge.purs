@@ -1,4 +1,4 @@
-module Knowledge where
+module Page.Knowledge where
 
 import Control.Monad.State as S
 import Data.Const (Const)

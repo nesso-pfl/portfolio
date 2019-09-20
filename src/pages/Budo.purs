@@ -1,4 +1,4 @@
-module Budo where
+module Page.Budo where
 
 import Control.Monad.State as S
 import Data.Const (Const)

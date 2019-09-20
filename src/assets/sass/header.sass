@@ -1,4 +1,4 @@
-.header
+header.header
   display: flex
   justify-content: flex-end
 
@@ -6,3 +6,45 @@
     border-bottom: 1px solid black
     height: 5vh
     width: 10vw
+
+.page.blog
+  display: flex
+  justify-content: center
+
+  .left-area, .right-area
+    vw: 20vw
+
+  .central-area
+    margin: 0 5vw
+
+.page.blog-edit
+  display: flex
+  flex-direction: column
+  .title
+    align-self: flex-start
+
+    input
+      border: none
+
+  .edit-area
+    align-self: center
+    display: flex
+    height: 80vh
+
+    .input
+      border: 2px dashed lightgrey
+      width: 45vw
+
+      textarea
+        border: none
+        height: 100%
+        width: 100%
+
+    .rendered
+      width: 45vw
+
+  .btn-save
+    align-self: flex-end
+    background: none
+    border: 2px dashed lightgrey
+    padding: 0.3vw 2vw

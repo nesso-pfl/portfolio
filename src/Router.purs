@@ -1,30 +1,28 @@
 module Router where
 
-import Header as Header
-import Home as Home
-import Blog as Blog
-import Biography as Biography
-import Budo as Budo
-import Knowledge as Knowledge
-import Products as Products
+import Component.Header as Header
+import Page.Home as Home
+import Page.Blog as Blog
+import Page.Blog.Edit as BlogE
+import Page.Biography as Biography
+import Page.Budo as Budo
+import Page.Knowledge as Knowledge
+import Page.Products as Products
 
 import Control.Alt ((<|>))
 import Data.Maybe (Maybe(..))
 import Data.Symbol (SProxy(..))
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff)
-import Effect.Class (liftEffect)
-import Effect.Class.Console (log)
 import Halogen as H
-import Halogen.HTML as HH
-import Halogen.HTML.Properties as HP
-import Halogen.HTML.Events as HE
+import Halogen.HTML (HTML, div_, slot)
 import Prelude
-import Routing.Match (Match, lit)
+import Routing.Match (Match, lit, end, root)
 
 data Routes
     = Home
     | Blog
+    | BlogE
     | Budo
     | Biography
     | Knowledge
@@ -33,6 +31,7 @@ data Routes
 instance showRoutes :: Show Routes where
   show Home = "Home"
   show Blog = "Blog"
+  show BlogE = "Blog Edit"
   show Biography = "Biography"
   show Budo = "Budo"
   show Knowledge = "Knowledge"
@@ -50,6 +49,7 @@ type Slot =
     ( header :: Header.Slot Unit
     , home :: Home.Slot Unit
     , blog :: Blog.Slot Unit
+    , blogE :: BlogE.Slot Unit
     , biography :: Biography.Slot Unit
     , budo :: Budo.Slot Unit
     , knowledge :: Knowledge.Slot Unit
@@ -59,6 +59,7 @@ type Slot =
 _header = SProxy :: SProxy "header"
 _home = SProxy :: SProxy "home"
 _blog = SProxy :: SProxy "blog"
+_blogE = SProxy :: SProxy "blogE"
 _biography = SProxy :: SProxy "biography"
 _budo = SProxy :: SProxy "budo"
 _knowledge = SProxy :: SProxy "knowledge"
@@ -74,15 +75,16 @@ initialState _ =
     }
 
 routing :: Match Routes
-routing = Blog <$ lit "" <* lit "blog"
-      <|> Biography <$ lit "" <* lit "biography"
-      <|> Budo <$ lit "" <* lit "budo"
-      <|> Products <$ lit "" <* lit "products"
-      <|> Knowledge <$ lit "" <* lit "knowledge"
-      <|> Home <$ lit ""
+routing = Blog <$ root <* lit "blog" <* end
+      <|> BlogE <$ root <* lit "blog" <* lit "edit"
+      <|> Biography <$ root <* lit "biography" <* end
+      <|> Budo <$ root <* lit "budo" <* end
+      <|> Products <$ root <* lit "products" <* end
+      <|> Knowledge <$ root <* lit "knowledge" <* end
+      <|> Home <$ root
 
 
-ui :: H.Component HH.HTML Query Unit Message Aff
+ui :: H.Component HTML Query Unit Message Aff
 ui = H.mkComponent
     { initialState
     , render
@@ -95,19 +97,20 @@ ui = H.mkComponent
 
 render :: State -> H.ComponentHTML Action Slot Aff
 render st =
-    HH.div_
-        [ HH.slot _header unit Header.ui unit \msg -> Just $ ChangeRoute msg
+    div_
+        [ slot _header unit Header.ui unit (Just <<< ChangeRoute)
         , view st.currentPage
         ]
 
     where
         view :: Routes -> H.ComponentHTML Action Slot Aff
-        view Home = HH.slot _home unit Home.ui unit absurd
-        view Blog = HH.slot _blog unit Blog.ui unit absurd
-        view Biography = HH.slot _biography unit Biography.ui unit absurd
-        view Budo = HH.slot _budo unit Budo.ui unit absurd
-        view Knowledge = HH.slot _knowledge unit Knowledge.ui unit absurd
-        view Products = HH.slot _products unit Products.ui unit absurd
+        view Home = slot _home unit Home.ui unit absurd
+        view Blog = slot _blog unit Blog.ui unit absurd
+        view BlogE = slot _blogE unit BlogE.ui unit (Just <<< ChangeRoute)
+        view Biography = slot _biography unit Biography.ui unit absurd
+        view Budo = slot _budo unit Budo.ui unit absurd
+        view Knowledge = slot _knowledge unit Knowledge.ui unit absurd
+        view Products = slot _products unit Products.ui unit absurd
 
 handleAction :: Action -> H.HalogenM State Action Slot Message Aff Unit
 handleAction = case _ of

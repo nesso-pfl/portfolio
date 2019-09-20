@@ -1,4 +1,4 @@
-module Home where
+module Page.Home where
 
 import Control.Monad.State as S
 import Data.Const (Const)
