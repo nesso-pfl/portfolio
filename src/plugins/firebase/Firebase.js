@@ -20,12 +20,25 @@ exports.add_ = function(docData, colRef) {
   return colRef.add(docData);
 };
 
+exports.id_ = function(colRef) {
+  return colRef.id;
+};
+
 exports.doc_ = function(documentPath, firestore) {
   return firestore.doc(documentPath);
 };
 
-exports.get_ = function(options, firestore) {
-  return firestore.get(options);
+exports.limit_ = function(n, query) {
+  return query.limit(n);
+};
+
+exports.get_ = function(options, ref, f) {
+  return ref.get().then(function(ss) { return f(ss); });
+};
+
+exports.docs_ = function(querySnapshot) {
+  console.log(querySnapshot);
+  return querySnapshot.docs;
 };
 
 exports.data_ = function(snapShot) {
