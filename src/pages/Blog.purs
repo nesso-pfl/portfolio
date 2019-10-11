@@ -62,11 +62,11 @@ handleAction :: Action -> H.HalogenM State Action () Void Aff Unit
 handleAction = case _ of
     GetBlogs -> do
        colRef <- H.liftEffect $ F.initializeApp F.firebaseConfig Nothing >>= F.firestore >>= F.collection "blogs"
-       F.get Nothing colRef \ss -> do
-           H.liftEffect $ log "hoho"
-           d <- H.liftEffect $ F.docs ss >>= traverse F.data'
-           H.liftEffect $ log $ show d
-           H.put d
+       ss <- liftAff $ F.get Nothing colRef
+       H.liftEffect $ log "hoho"
+       d <- H.liftEffect $ F.docs ss >>= traverse F.data'
+       H.liftEffect $ log $ show d
+       H.put d
 
     Fa -> do
        H.liftEffect $ log "hoho"

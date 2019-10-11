@@ -11,3 +11,4 @@
 /.psa*
 /.spago
 /index.js
+public/index.js

@@ -27,6 +27,7 @@ module Plugin.Firebase
 
 import Prelude
 
+import Control.Promise (Promise, toAffE)
 import Data.Either (Either (..))
 import Data.Options as O
 import Data.Maybe (Maybe(..))
@@ -108,9 +109,9 @@ limit :: forall a. Inquiry a => Int -> a -> Effect a
 limit = runEffectFn2 limit_
 foreign import limit_ :: forall a. Inquiry a => EffectFn2 Int a a
 
-get :: forall m a. MonadEffect m => Maybe GetOptions -> CollectionRef -> (QuerySnapshot -> m a) -> m a
-get a b f = liftEffect $ runEffectFn3 get_ a b f
-foreign import get_ :: forall m a. EffectFn3 (Maybe GetOptions) CollectionRef (QuerySnapshot -> m a) a
+get :: Maybe GetOptions -> CollectionRef -> Aff QuerySnapshot
+get a b = toAffE $ runEffectFn2 get_ a b
+foreign import get_ :: EffectFn2 (Maybe GetOptions) CollectionRef (Promise QuerySnapshot)
 
 docs :: QuerySnapshot -> Effect QueryDocumentSnapshots
 docs = runEffectFn1 docs_

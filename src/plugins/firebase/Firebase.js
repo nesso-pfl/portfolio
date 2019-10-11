@@ -32,8 +32,10 @@ exports.limit_ = function(n, query) {
   return query.limit(n);
 };
 
-exports.get_ = function(options, ref, f) {
-  return ref.get().then(function(ss) { return f(ss); });
+exports.get_ = function(options, ref) {
+  return function() {
+    return ref.get();
+  }
 };
 
 exports.docs_ = function(querySnapshot) {
