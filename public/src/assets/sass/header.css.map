@@ -1,1 +1,0 @@
-{"version":3,"sources":["src\\assets\\sass\\header.sass"],"names":[],"mappings":"AAAA;EACE;EACA;;AAEA;EACE;EACA;EACA","file":"header.css","sourceRoot":"..","sourcesContent":[".header\r\n  display: flex\r\n  justify-content: flex-end\r\n\r\n  .content\r\n    border-bottom: 1px solid black\r\n    height: 5vh\r\n    width: 10vw\r\n"]}
