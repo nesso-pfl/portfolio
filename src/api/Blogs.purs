@@ -1,18 +1,16 @@
 module API.Blogs where
 
-import Plugin.Firebase as F
-import API.Comments as C
-
 import Prelude
+import API.Comments as C
+import Plugin.Firebase as F
 
 import Data.Maybe (Maybe(..))
-import Data.Options as O
-import Effect.Class.Console (log)
+import Data.Traversable (traverse)
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Aff (Aff)
-import Halogen as H
-import Halogen.Query.EventSource as ES
+import Effect.Aff.Class (liftAff)
+
 
 type Blog =
     { title :: String
@@ -24,16 +22,17 @@ type Blog =
     , public :: Boolean
     }
 
+type Blogs = Array Blog
+
+
 createBlog :: Blog -> Effect F.DocumentRef
 createBlog blog = do
     colRef <- F.initializeApp F.firebaseConfig Nothing >>= F.firestore >>= F.collection "blogs"
     F.add blog colRef
 
-{-
-getBlog :: Int -> Aff Unit
+getBlog :: Int -> Aff Blogs
 getBlog n = do
-    colRef <- liftEffect $ F.initializeApp F.firebaseConfig Nothing >>= F.firestore >>= F.collection "blogs"
-    F.get Nothing colRef \ss -> do
-        d <- liftEffect $ F.docs ss >>= F.data'
-        H.put d
--}
+    colRef <- liftEffect $
+        F.initializeApp F.firebaseConfig Nothing >>= F.firestore >>= F.collection "blogs" >>= F.limit n
+    ss <- liftAff $ F.get Nothing colRef
+    liftEffect $ F.docs ss >>= traverse F.data'

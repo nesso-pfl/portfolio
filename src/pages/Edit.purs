@@ -1,32 +1,27 @@
 module Page.Blog.Edit where
 
+import Prelude
+import API.Blogs as B
+import Plugin.HalogenR (buttonCE1, divC, divC1, divCI1)
+import Plugin.MarkdownIt as MD
+import Plugin.Vim (addKeydownEvent)
+
+import Data.Options ((:=))
+import Data.Const (Const)
+import Data.DateTime.Instant (unInstant, toDateTime)
+import Data.Maybe (Maybe(..))
+import Effect.Aff (Aff)
+import Effect.Now (now)
+
 import Ace (Editor, ace, edit)
-import Ace.Config as AC
-import Ace.Document (getAllLines, onChange)
 import Ace.Document as AD
 import Ace.Editor (getSession)
 import Ace.Editor as AE
-import Ace.EditSession (getDocument)
 import Ace.EditSession as AS
-import API.Blogs as B
-import Plugin.HalogenR
-import Plugin.Vim (addKeydownEvent)
 
-import Prelude
-
-import Data.Options ((:=))
-import Plugin.MarkdownIt as MD
-import Data.Const (Const)
-import Data.DateTime.Instant (unInstant, toDateTime)
-import Data.List (foldl)
-import Data.Maybe (Maybe(..))
-import Data.String.Common (joinWith)
-import Effect.Aff (Aff, launchAff_)
-import Effect.Console (log)
-import Effect.Now (now)
 import Halogen as H
-import Halogen.HTML (HTML, input, text, textarea)
-import Halogen.HTML.Events (onValueChange, onValueInput)
+import Halogen.HTML (HTML, input, text)
+import Halogen.HTML.Events (onValueChange)
 import Halogen.Query.EventSource as ES
 import Html.Renderer.Halogen as RH
 
@@ -91,7 +86,7 @@ handleAction = case _ of
         e <- H.gets _.editor
         case e of
             Just e -> do
-                doc <- H.liftEffect $ getSession e >>= getDocument
+                doc <- H.liftEffect $ getSession e >>= AS.getDocument
                 t <- H.liftEffect $ AE.getValue e
                 let opt = MD.html    := true
                        <> MD.linkify := true
@@ -101,8 +96,7 @@ handleAction = case _ of
             Nothing -> pure unit
     SaveBlog -> do
         now_ <- H.liftEffect now
-        H.liftEffect $ log <<< show <<< toDateTime $ now_
-        H.modify_ (_ { blog { date = show (unInstant now_) } })
+        H.modify_ $ _ { blog { date = show (unInstant now_) } }
         blog <- H.gets _.blog
         _ <- H.liftEffect $ B.createBlog blog
         H.raise "/blog"
@@ -112,9 +106,9 @@ handleAction = case _ of
         -- _ <- H.liftEffect $ AC.set AC.basePath "path"
         -- H.liftEffect $ AE.setKeyboardHandler "ace/keyboard/vim" editor
         H.modify_ $ _ { editor = Just editor }
-        doc <- H.liftEffect $ getSession editor >>= getDocument
+        doc <- H.liftEffect $ getSession editor >>= AS.getDocument
         void $ H.subscribe $ ES.effectEventSource \emitter -> do
-            onChange doc (\_ -> ES.emit emitter $ InputText)
+            AD.onChange doc (\_ -> ES.emit emitter $ InputText)
             pure mempty
         pure unit
     -- If using my vim plugin, switch initialize to this

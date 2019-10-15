@@ -1,26 +1,26 @@
 module Page.Blog where
 
-import Plugin.HalogenR
+import Prelude
 import API.Blogs as B
-
+import Plugin.HalogenR (divC, divC1)
 import Plugin.Firebase as F
-import Plugin.MarkdownIt
+import Plugin.MarkdownIt as MD
+
 import Data.Maybe (Maybe(..))
-import Data.Array (length)
 import Data.Const (Const)
+import Data.Options ((:=))
 import Data.Traversable (traverse)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (liftAff)
-import Effect.Class.Console (log)
+import Effect (Effect)
+
 import Halogen as H
-import Halogen.HTML (ClassName(..), HTML, div, h1_, text)
-import Halogen.HTML.Properties as HP
-import Prelude
+import Halogen.HTML (HTML, text)
+import Html.Renderer.Halogen as RH
 
 
 data Action
     = GetBlogs
-    | Fa
 
 ui :: H.Component HTML (Const Unit) Unit Void Aff
 ui = H.mkComponent
@@ -32,11 +32,11 @@ ui = H.mkComponent
         }
     }
 
-type State = Array B.Blog
+type State = B.Blogs
 
 type Slot = H.Slot (Const Unit) Void
 
-initialState :: Unit -> Array B.Blog
+initialState :: Unit -> B.Blogs
 initialState _ = []
 
 render :: State -> H.ComponentHTML Action () Aff
@@ -50,7 +50,7 @@ render st =
     where blogMain :: forall p. State -> Array (HTML p Action)
           blogMain = map \b -> divC "blog"
               [ divC1 "header" ( divC1 "title" $ text b.title )
-              , divC1 "main" ( divC1 "text" $ text b.text )
+              , divC1 "main" ( divC1 "text" $ RH.render_ b.text )
               , divC "footer"
                   [ divC "tags" $ map text b.tags
                   , divC1 "date" $ text b.date
@@ -61,13 +61,15 @@ render st =
 handleAction :: Action -> H.HalogenM State Action () Void Aff Unit
 handleAction = case _ of
     GetBlogs -> do
-       colRef <- H.liftEffect $ F.initializeApp F.firebaseConfig Nothing >>= F.firestore >>= F.collection "blogs"
-       ss <- liftAff $ F.get Nothing colRef
-       H.liftEffect $ log "hoho"
-       d <- H.liftEffect $ F.docs ss >>= traverse F.data'
-       H.liftEffect $ log $ show d
-       H.put d
+       blogs <- liftAff $ B.getBlog 5
+       renderedBlogs <- H.liftEffect $ renderToHtml blogs
+       H.put renderedBlogs
 
-    Fa -> do
-       H.liftEffect $ log "hoho"
-       pure unit
+renderToHtml :: B.Blogs -> Effect B.Blogs
+renderToHtml blogs = do
+    let opt = MD.html    := true
+           <> MD.linkify := true
+    md <- MD.newMarkdownIt MD.CommonMark opt
+    blogs # traverse \b -> do
+        renderedText <- MD.render md b.text
+        pure $ b { text = renderedText }

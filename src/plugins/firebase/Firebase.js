@@ -33,13 +33,10 @@ exports.limit_ = function(n, query) {
 };
 
 exports.get_ = function(options, ref) {
-  return function() {
-    return ref.get();
-  }
+  return ref.get();
 };
 
 exports.docs_ = function(querySnapshot) {
-  console.log(querySnapshot);
   return querySnapshot.docs;
 };
 
