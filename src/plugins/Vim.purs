@@ -61,7 +61,7 @@ withVimDom f = do
     let el = dom >>= fromElement
     justThen f el
 
-justThen :: forall a. (a -> Effect Unit) -> (Maybe a) -> Effect Unit
+justThen :: ∀ a. (a -> Effect Unit) -> (Maybe a) -> Effect Unit
 justThen f a =
     if isJust a then f (unsafePartial fromJust a) else pure unit
 

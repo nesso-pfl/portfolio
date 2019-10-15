@@ -15,6 +15,7 @@ You can edit this file as you like.
     , "foreign"
     , "foreign-generic"
     , "halogen"
+    , "media-types"
     , "now"
     , "options"
     , "psci-support"

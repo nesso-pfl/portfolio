@@ -3,7 +3,6 @@ module Page.Blog where
 import Prelude
 import API.Blogs as B
 import Plugin.HalogenR (divC, divC1)
-import Plugin.Firebase as F
 import Plugin.MarkdownIt as MD
 
 import Data.Maybe (Maybe(..))
@@ -11,7 +10,6 @@ import Data.Const (Const)
 import Data.Options ((:=))
 import Data.Traversable (traverse)
 import Effect.Aff (Aff)
-import Effect.Aff.Class (liftAff)
 import Effect (Effect)
 
 import Halogen as H
@@ -42,12 +40,28 @@ initialState _ = []
 render :: State -> H.ComponentHTML Action () Aff
 render st =
     divC "page blog"
-        [ divC1 "left-area" $ text "Recent Act and Search Form"
+        [ divC "left-area"
+            [ divC "recent-posts"
+                [ divC1 "title" $ text "Recent Posts"
+                , divC "contents" $ recentPosts st
+                ]
+            , divC "recent-comments"
+                [ divC1 "title" $ text "Recent Comments"
+                , divC "contents" $ recentComments st
+                ]
+            ]
         , divC "central-area" $ blogMain st
-        , divC1 "right-area" $ text "Adds"
+        , divC "right-area"
+            [ divC "tags"
+                [ divC1 "title" $ text "Tags"
+                , divC "contents" $ tags st
+                ]
+            , divC "search"
+                []
+            ]
         ]
 
-    where blogMain :: forall p. State -> Array (HTML p Action)
+    where blogMain :: ∀ p. State -> Array (HTML p Action)
           blogMain = map \b -> divC "blog"
               [ divC1 "header" ( divC1 "title" $ text b.title )
               , divC1 "main" ( divC1 "text" $ RH.render_ b.text )
@@ -57,11 +71,17 @@ render st =
                   -- , divC1 "comments" $ text <<< show <<< length $ b.comments
                   ]
               ]
+          recentPosts :: ∀ p. State -> Array (HTML p Action)
+          recentPosts = map \b -> divC "content" []
+          recentComments :: ∀ p. State -> Array (HTML p Action)
+          recentComments = map \b -> divC "content" []
+          tags :: ∀ p. State -> Array (HTML p Action)
+          tags = map \b -> divC "content" []
 
 handleAction :: Action -> H.HalogenM State Action () Void Aff Unit
 handleAction = case _ of
     GetBlogs -> do
-       blogs <- liftAff $ B.getBlog 5
+       blogs <- H.liftAff $ B.getBlog 5
        renderedBlogs <- H.liftEffect $ renderToHtml blogs
        H.put renderedBlogs
 

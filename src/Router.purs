@@ -117,7 +117,7 @@ handleAction = case _ of
     ChangeRoute s -> do
         H.raise s
 
-handleQuery :: forall a. Query a -> H.HalogenM State Action Slot Message Aff (Maybe a)
+handleQuery :: ∀ a. Query a -> H.HalogenM State Action Slot Message Aff (Maybe a)
 handleQuery = case _ of
     ListenRoute r a -> do
         H.modify_ (_ { currentPage = r })

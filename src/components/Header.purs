@@ -32,7 +32,7 @@ type Slot index = H.Slot (Const Void) Message index
 
 type Message = String
 
-ui :: forall q i. H.Component HTML q i Message Aff
+ui :: ∀ q i. H.Component HTML q i Message Aff
 ui = H.mkComponent
     { initialState: const unit
     , render
@@ -41,15 +41,15 @@ ui = H.mkComponent
         }
     }
 
-render :: forall s. Unit -> H.ComponentHTML Action s Aff
+render :: ∀ s. Unit -> H.ComponentHTML Action s Aff
 render _ =
     header [ HP.class_ $ ClassName "header" ]
         (headerContents <> [ link [ HP.href "/assets/sass/header.sass" ] ])
-    where headerContents :: forall p. Array (HTML p Action)
+    where headerContents :: ∀ p. Array (HTML p Action)
           headerContents = contents # map \c ->
               divCE1 ("content " <> toLower c) (Goto c) $ text c
 
-handleAction :: forall s. Action -> H.HalogenM Unit Action s Message Aff Unit
+handleAction :: ∀ s. Action -> H.HalogenM Unit Action s Message Aff Unit
 handleAction = case _ of
     Goto "Home" -> do
         H.raise $ "/"

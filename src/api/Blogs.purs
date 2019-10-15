@@ -32,7 +32,6 @@ createBlog blog = do
 
 getBlog :: Int -> Aff Blogs
 getBlog n = do
-    colRef <- liftEffect $
-        F.initializeApp F.firebaseConfig Nothing >>= F.firestore >>= F.collection "blogs" >>= F.limit n
-    ss <- liftAff $ F.get Nothing colRef
+    colRef <- liftEffect $ F.initializeApp F.firebaseConfig Nothing >>= F.firestore >>= F.collection "blogs"
+    ss <- F.get Nothing colRef
     liftEffect $ F.docs ss >>= traverse F.data'
