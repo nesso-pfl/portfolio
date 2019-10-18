@@ -2,7 +2,7 @@ module Page.Blog.Edit where
 
 import Prelude
 import API.Blogs as B
-import Plugin.HalogenR (buttonCE1, divC, divC1, divCI1)
+import Plugin.HalogenR (buttonCE1, divC, divC1, divCI1, inputtextE)
 import Plugin.MarkdownIt as MD
 import Plugin.Vim (addKeydownEvent)
 
@@ -11,7 +11,10 @@ import Data.Const (Const)
 import Data.DateTime.Instant (unInstant, toDateTime)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
+import Effect.Class.Console (log)
 import Effect.Now (now)
+import Web.Event.Internal.Types (Event)
+import Web.UIEvent.KeyboardEvent (KeyboardEvent, key, fromEvent)
 
 import Ace (Editor, ace, edit)
 import Ace.Document as AD
@@ -41,6 +44,8 @@ type Message = String
 type State = 
     { blog :: B.Blog
     , renderedText :: String
+    , tags :: Array String
+    , inputTag :: String
     , editor :: Maybe Editor
     }
 
@@ -49,6 +54,7 @@ type Slot = H.Slot (Const Unit) Message
 data Action
     = ChangeTitle String
     | InputText
+    | InputTag Event
     | SaveBlog
     | InitAce
     | AddKeyEvent
@@ -64,6 +70,8 @@ initialState _ =
             , public: true
             }
     , renderedText: ""
+    , tags: []
+    , inputTag: ""
     , editor: Nothing
     }
 
@@ -75,8 +83,12 @@ render st =
             [ divCI1 "input" "editor-ace" $ text ""
             , divC1 "rendered" $ RH.render_ st.renderedText
             ]
+        , divC "tags" $ tags st <> [ inputtextE st.inputTag InputTag ]
         , buttonCE1 "btn-save" SaveBlog $ text "保存"
         ]
+    where tags :: ∀ p i. State -> Array (HTML p i)
+          tags st = st.tags # map \t -> divC1 "tag" $ text t
+
 
 handleAction :: Action -> H.HalogenM State Action () Message Aff Unit
 handleAction = case _ of
@@ -94,6 +106,14 @@ handleAction = case _ of
                 renderedText <- H.liftEffect $ MD.render md t
                 H.modify_ $ _ { blog { text = t }, renderedText = renderedText }
             Nothing -> pure unit
+    InputTag e -> do
+        keyE <- fromEvent e
+        case keyE of
+            Just keyE' -> do
+                H.liftEffect $ log $ key keyE'
+                pure unit
+            Nothing ->
+                pure unit
     SaveBlog -> do
         now_ <- H.liftEffect now
         H.modify_ $ _ { blog { date = show (unInstant now_) } }

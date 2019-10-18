@@ -28,6 +28,7 @@ module Plugin.Firebase
 import Prelude
 
 import Control.Promise (Promise, toAffE)
+import Data.Array (null)
 import Data.Options as O
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
@@ -72,12 +73,24 @@ firebaseConfig =
 source :: O.Option GetOptions String
 source = O.opt "source"
 
+apps :: Effect FirebaseApp
+apps = pure apps_
+foreign import apps_ :: FirebaseApp
+
+app :: Effect FirebaseApp
+app = pure app_
+foreign import app_ :: FirebaseApp
+
+initialized :: Effect Boolean
+initialized = pure initialized_
+foreign import initialized_ :: Boolean
+
 sdkVersion :: Effect String
 sdkVersion = pure sdkVersion_
 foreign import sdkVersion_ :: String
 
 initializeApp :: FirebaseConfig -> Maybe String -> Effect FirebaseApp
-initializeApp = runEffectFn2 initializeApp_
+initializeApp c s = runEffectFn2 initializeApp_ c s
 foreign import initializeApp_ :: EffectFn2 FirebaseConfig (Maybe String) FirebaseApp
 
 firestore :: FirebaseApp -> Effect Firestore

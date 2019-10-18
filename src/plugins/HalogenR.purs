@@ -3,6 +3,7 @@ module Plugin.HalogenR
     , divC1
     , divCE1
     , divCI1
+    , inputtextE
     , textareaIE
     , buttonCE1
     )
@@ -10,9 +11,11 @@ module Plugin.HalogenR
 
 import Prelude
 import Data.Maybe (Maybe(..))
-import Halogen.HTML (HTML, ClassName(..), div, button, textarea)
-import Halogen.HTML.Properties (class_, id_)
-import Halogen.HTML.Events (onClick, onValueInput)
+import Halogen.HTML (HTML, ClassName(..), div, button, input, textarea)
+import Halogen.HTML.Properties (class_, id_, value)
+import Halogen.HTML.Core (PropName(..))
+import Halogen.HTML.Events (onClick, onInput, onValueInput)
+import Web.Event.Internal.Types (Event)
 
 divC :: ∀ p i. String -> Array (HTML p i) -> HTML p i
 divC cls es = div [ class_ $ ClassName cls ] es
@@ -29,6 +32,9 @@ divCE1 cls action e =
 
 divCI1 :: ∀ p i. String -> String -> HTML p i -> HTML p i
 divCI1 cls i e = div [ class_ $ ClassName cls, id_ i ] [ e ]
+
+inputtextE :: ∀ p i. String -> (Event -> i) -> HTML p i
+inputtextE s action = input [ value $ s, onInput $ Just <<< action ]
 
 textareaIE :: ∀ p i. String -> (String -> i) -> HTML p i
 textareaIE i action = textarea [ id_ i, onValueInput $ Just <<< action ]

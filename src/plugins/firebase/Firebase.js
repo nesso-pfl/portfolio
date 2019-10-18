@@ -1,11 +1,27 @@
 var firebase = require("firebase");
 
+exports.apps_ = function() {
+  return firebase.apps;
+};
+
+exports.app_ = function() {
+  return firebase.app();
+};
+
+exports.initialized_ = function() {
+  return Boolean(firebase.apps.length);
+};
+
 exports.sdkVersion_ = function() {
   return firebase.SDK_VERSION;
 };
 
 exports.initializeApp_ = function(options, name) {
-  return firebase.initializeApp(options, name);
+  if (firebase.apps.length) {
+    return firebase.app();
+  } else {
+    return firebase.initializeApp(options, name);
+  }
 };
 
 exports.firestore_ = function(app) {
