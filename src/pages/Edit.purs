@@ -2,7 +2,7 @@ module Page.Blog.Edit where
 
 import Prelude
 import API.Blogs as B
-import Plugin.HalogenR (buttonCE1, divC, divC1, divCI1, inputtextE)
+import Plugin.HalogenR (buttonCE1, divC, divC1, divCI1, inputtextIE, spanC1, withDomId)
 import Plugin.MarkdownIt as MD
 import Plugin.Vim (addKeydownEvent)
 
@@ -10,6 +10,7 @@ import Data.Options ((:=))
 import Data.Const (Const)
 import Data.DateTime.Instant (unInstant, toDateTime)
 import Data.Maybe (Maybe(..))
+import Data.String.Common (null)
 import Effect.Aff (Aff)
 import Effect.Class.Console (log)
 import Effect.Now (now)
@@ -27,6 +28,7 @@ import Halogen.HTML (HTML, input, text)
 import Halogen.HTML.Events (onValueChange)
 import Halogen.Query.EventSource as ES
 import Html.Renderer.Halogen as RH
+import Web.HTML.HTMLElement (focus)
 
 
 ui :: H.Component HTML (Const Unit) Unit Message Aff
@@ -44,7 +46,6 @@ type Message = String
 type State = 
     { blog :: B.Blog
     , renderedText :: String
-    , tags :: Array String
     , inputTag :: String
     , editor :: Maybe Editor
     }
@@ -54,7 +55,8 @@ type Slot = H.Slot (Const Unit) Message
 data Action
     = ChangeTitle String
     | InputText
-    | InputTag Event
+    | InputTag String
+    | EnterTag KeyboardEvent
     | SaveBlog
     | InitAce
     | AddKeyEvent
@@ -70,7 +72,6 @@ initialState _ =
             , public: true
             }
     , renderedText: ""
-    , tags: []
     , inputTag: ""
     , editor: Nothing
     }
@@ -78,16 +79,22 @@ initialState _ =
 render :: State -> H.ComponentHTML Action () Aff
 render st =
     divC "page blog-edit"
-        [ divC1 "title" $ input [ onValueChange $ Just <<< ChangeTitle ]
-        , divC "edit-area"
-            [ divCI1 "input" "editor-ace" $ text ""
-            , divC1 "rendered" $ RH.render_ st.renderedText
+        [ divC "left-area"
+            [ divC "title"
+                [ spanC1 "pretext" $ text "Title: "
+                , input [ onValueChange $ Just <<< ChangeTitle ]
+                ]
+            , divC "edit-area" [ divCI1 "input" "editor-ace" $ text "" ]
+            , divC "tags" $
+                [ spanC1 "pretext" $ text "Tags: " ]
+                <> tags st
+                <> [ inputtextIE "tags-input" InputTag EnterTag ]
+            , buttonCE1 "btn-save" SaveBlog $ text "保存"
             ]
-        , divC "tags" $ tags st <> [ inputtextE st.inputTag InputTag ]
-        , buttonCE1 "btn-save" SaveBlog $ text "保存"
+        , divC "right-area" [ divC1 "rendered" $ RH.render_ st.renderedText ]
         ]
     where tags :: ∀ p i. State -> Array (HTML p i)
-          tags st = st.tags # map \t -> divC1 "tag" $ text t
+          tags st = st.blog.tags # map \t -> spanC1 "tag" $ text (t <> ", ")
 
 
 handleAction :: Action -> H.HalogenM State Action () Message Aff Unit
@@ -106,14 +113,19 @@ handleAction = case _ of
                 renderedText <- H.liftEffect $ MD.render md t
                 H.modify_ $ _ { blog { text = t }, renderedText = renderedText }
             Nothing -> pure unit
-    InputTag e -> do
-        keyE <- fromEvent e
-        case keyE of
-            Just keyE' -> do
-                H.liftEffect $ log $ key keyE'
-                pure unit
-            Nothing ->
-                pure unit
+    InputTag s -> do
+        H.modify_ $ _ { inputTag = s }
+    EnterTag e -> do
+        case key e of
+            "Enter" -> do
+                inputTag <- H.gets _.inputTag
+                if not $ null inputTag
+                then do
+                    tags <- H.gets _.blog.tags
+                    H.modify_ $ _ { inputTag = "", blog { tags = tags <> [ inputTag ] } }
+                    H.liftEffect $ withDomId "tags-input" focus
+                else pure unit
+            a -> pure unit
     SaveBlog -> do
         now_ <- H.liftEffect now
         H.modify_ $ _ { blog { date = show (unInstant now_) } }

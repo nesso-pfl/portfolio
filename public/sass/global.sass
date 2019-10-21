@@ -26,6 +26,10 @@ $green: #4ecb74
 
 body
   font-family: RictyDiminished-with-FiraCode
+  font-size: $medium
+
+input
+  font-family: inherit
 
 header.header
   display: flex
@@ -48,20 +52,35 @@ header.header
 
 .page.blog-edit
   display: flex
-  flex-direction: column
+  justify-content: space-between
+
+  .left-area
+    width: 50%
+  .right-area
+    margin-right: 54px
+    max-width: 45%
+    min-width: 36%
+    width: 704px
+
   .title
     align-self: flex-start
+    border-bottom: 1px solid $gray
+    margin-bottom: $xx-large
+
+    .pretext
+      font-size: $large
 
     input
       border: none
+      font-size: $medium
+      outline: none
 
   .edit-area
     align-self: center
     display: flex
-    height: 80vh
+    height: 60vh
 
     .input
-      border: 2px dashed lightgrey
       width: 45vw
 
       textarea
@@ -72,8 +91,23 @@ header.header
     .rendered
       width: 45vw
 
+  .tags
+    border-bottom: 1px solid $gray
+    margin: $xx-large 0 $x-large
+    width: 400px
+
+    .pretext
+      font-size: $large
+
+    input
+      border: none
+      font-size: $medium
+      outline: none
+
+
   .btn-save
     align-self: flex-end
     background: none
-    border: 2px dashed lightgrey
-    padding: 0.3vw 2vw
+    border: 1px solid $gray
+    border-radius: 27px
+    padding: 4px 12px
