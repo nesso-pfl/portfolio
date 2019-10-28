@@ -2,18 +2,17 @@ module Page.Blog.Edit where
 
 import Prelude
 import API.Blogs as B
+import Plugin.Firebase as F
 import Plugin.HalogenR (buttonCE1, divC, divC1, divCI1, inputtextIE, spanC1, withDomId)
 import Plugin.MarkdownIt as MD
 import Plugin.Vim (addKeydownEvent)
 
 import Data.Options ((:=))
 import Data.Const (Const)
-import Data.DateTime.Instant (unInstant, toDateTime)
 import Data.Maybe (Maybe(..))
 import Data.String.Common (null)
 import Effect.Aff (Aff)
 import Effect.Class.Console (log)
-import Effect.Now (now)
 import Web.Event.Internal.Types (Event)
 import Web.UIEvent.KeyboardEvent (KeyboardEvent, key, fromEvent)
 
@@ -63,14 +62,7 @@ data Action
 
 initialState :: Unit -> State
 initialState _ =
-    { blog: { title: ""
-            , text: ""
-            , tags: []
-            , comments: []
-            , read: 0
-            , date: ""
-            , public: true
-            }
+    { blog: B.initBlog
     , renderedText: ""
     , inputTag: ""
     , editor: Nothing
@@ -127,8 +119,7 @@ handleAction = case _ of
                 else pure unit
             a -> pure unit
     SaveBlog -> do
-        now_ <- H.liftEffect now
-        H.modify_ $ _ { blog { date = show (unInstant now_) } }
+        H.modify_ $ _ { blog { date = F.now } }
         blog <- H.gets _.blog
         _ <- H.liftEffect $ B.createBlog blog
         H.raise "/blog"

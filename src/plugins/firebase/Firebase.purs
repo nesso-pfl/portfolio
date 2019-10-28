@@ -11,6 +11,7 @@ module Plugin.Firebase
   , CollectionRef
   , collection
   , DocumentRef
+  , Timestamp
   , id
   , doc
   , docs
@@ -22,6 +23,9 @@ module Plugin.Firebase
   , data'
   , add
   , update
+  , now
+  , seconds
+  , toDate
   ) where
 
 
@@ -29,6 +33,7 @@ import Prelude
 
 import Control.Promise (Promise, toAffE)
 import Data.Array (null)
+import Data.JSDate as D
 import Data.Options as O
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
@@ -48,6 +53,7 @@ data Query
 data QuerySnapshot
 data QueryDocumentSnapshot
 type QueryDocumentSnapshots = Array QueryDocumentSnapshot
+data Timestamp
 
 type FirebaseConfig =
     { apiKey :: String
@@ -138,3 +144,15 @@ foreign import data_ :: ∀ a. EffectFn1 QueryDocumentSnapshot a
 update :: ∀ a. a -> DocumentRef -> Effect Unit
 update = runEffectFn2 update_
 foreign import update_ :: ∀ a. EffectFn2 a DocumentRef Unit
+
+now :: Timestamp
+now = now_
+foreign import now_ :: Timestamp
+
+seconds :: Timestamp -> Effect Int
+seconds = runEffectFn1 seconds_
+foreign import seconds_ :: EffectFn1 Timestamp Int
+
+toDate :: Timestamp -> D.JSDate
+toDate = toDate_
+foreign import toDate_ :: Timestamp ->  D.JSDate

@@ -67,7 +67,7 @@ render st =
               , divC1 "main" ( divC1 "text" $ RH.render_ b.text )
               , divC "footer"
                   [ divC "tags" $ map text b.tags
-                  , divC1 "date" $ text b.date
+                  , divC1 "date" $ text $ B.showDate b.date
                   -- , divC1 "comments" $ text <<< show <<< length $ b.comments
                   ]
               ]

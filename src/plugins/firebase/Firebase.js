@@ -63,3 +63,13 @@ exports.data_ = function(snapShot) {
 exports.update_ = function(data, docRef) {
   return docRef.update(data);
 };
+
+exports.now_ = new firebase.firestore.Timestamp.now();
+
+exports.seconds_ = function(timestamp) {
+  return timestamp.seconds;
+};
+
+exports.toDate_ = function(timestamp) {
+  return timestamp.toDate();
+};
