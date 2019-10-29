@@ -4,12 +4,14 @@ import Prelude
 import API.Comments as C
 import Plugin.Firebase as F
 
+import Data.Array (concatMap, filter, head, length)
 import Data.DateTime as DT
 import Data.Formatter.DateTime as FD
 import Data.Maybe (Maybe(..))
 import Data.JSDate as D
 import Data.List (fromFoldable)
 import Data.Traversable (traverse)
+import Data.Tuple as T
 import Effect (Effect)
 import Effect.Class (liftEffect)
 import Effect.Aff (Aff)
@@ -17,9 +19,10 @@ import Effect.Aff.Class (liftAff)
 
 
 type Blog =
-    { title :: String
+    { id :: String
+    , title :: String
     , text :: String
-    , tags :: Array String
+    , tags :: Tags
     , comments :: Array C.Comment
     , read :: Int
     , date :: F.Timestamp
@@ -27,10 +30,14 @@ type Blog =
     }
 
 type Blogs = Array Blog
+type Tag = String
+type Tags = Array String
+type TagInfo = Array (T.Tuple String Int)
 
 initBlog :: Blog
 initBlog =
-    { title: ""
+    { id: ""
+    , title: ""
     , text: ""
     , tags: []
     , comments: []
@@ -48,7 +55,15 @@ getBlog :: Int -> Aff Blogs
 getBlog n = do
     colRef <- liftEffect $ F.initializeApp F.firebaseConfig Nothing >>= F.firestore >>= F.collection "blogs"
     ss <- F.get Nothing colRef
-    liftEffect $ F.docs ss >>= traverse F.data'
+    liftEffect $ F.docs ss >>= traverse \d -> pure $ (F.data' d) { id = F.id d }
+
+tallyTags :: Blogs -> TagInfo
+tallyTags s = hoho $ concatMap _.tags s
+
+hoho :: Tags -> TagInfo
+hoho tags = case head tags of
+     Just t -> [T.Tuple t (length $ filter ((==) t) tags) ] <> hoho (filter ((/=) t) tags)
+     Nothing -> []
 
 showDate :: F.Timestamp -> String
 showDate t = case D.toDateTime $ F.toDate t of

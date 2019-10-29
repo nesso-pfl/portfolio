@@ -26,6 +26,7 @@ You can edit this file as you like.
     , "simple-json"
     , "string-parsers"
     , "strings"
+    , "tuples"
     , "web-html"
     ]
 , packages =

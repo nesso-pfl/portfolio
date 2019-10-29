@@ -54,6 +54,8 @@ data QuerySnapshot
 data QueryDocumentSnapshot
 type QueryDocumentSnapshots = Array QueryDocumentSnapshot
 data Timestamp
+data Auth
+data UserCredential
 
 type FirebaseConfig =
     { apiKey :: String
@@ -103,9 +105,9 @@ firestore :: FirebaseApp -> Effect Firestore
 firestore = runEffectFn1 firestore_
 foreign import firestore_ :: EffectFn1 FirebaseApp Firestore
 
-id :: CollectionRef -> Effect String
-id = runEffectFn1 id_
-foreign import id_ :: EffectFn1 CollectionRef String
+id :: QueryDocumentSnapshot -> String
+id = id_
+foreign import id_ :: QueryDocumentSnapshot -> String
 
 collection :: String -> Firestore -> Effect CollectionRef
 collection a b = runEffectFn2 collection_ a b
@@ -137,9 +139,9 @@ docs :: QuerySnapshot -> Effect QueryDocumentSnapshots
 docs = runEffectFn1 docs_
 foreign import docs_ :: EffectFn1 QuerySnapshot QueryDocumentSnapshots
 
-data' :: ∀ a. QueryDocumentSnapshot -> Effect a
-data' = runEffectFn1 data_
-foreign import data_ :: ∀ a. EffectFn1 QueryDocumentSnapshot a
+data' :: ∀ a. QueryDocumentSnapshot -> a
+data' = data_
+foreign import data_ :: ∀ a. QueryDocumentSnapshot -> a
 
 update :: ∀ a. a -> DocumentRef -> Effect Unit
 update = runEffectFn2 update_
@@ -156,3 +158,15 @@ foreign import seconds_ :: EffectFn1 Timestamp Int
 toDate :: Timestamp -> D.JSDate
 toDate = toDate_
 foreign import toDate_ :: Timestamp ->  D.JSDate
+
+auth :: FirebaseApp -> Effect Auth
+auth = runEffectFn1 auth_
+foreign import auth_ :: EffectFn1 FirebaseApp Auth
+
+currentUser :: Auth -> Effect (Maybe String)
+currentUser = runEffectFn1 currentUser_
+foreign import currentUser_ :: EffectFn1 Auth (Maybe String)
+
+createUserWithEmailAndPassword :: Auth -> String -> String -> Aff UserCredential
+createUserWithEmailAndPassword a b c = toAffE $ runEffectFn3 createUserWithEmailAndPassword_ a b c
+foreign import createUserWithEmailAndPassword_ :: EffectFn3 Auth String String (Promise UserCredential)

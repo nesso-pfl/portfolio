@@ -2,6 +2,7 @@ module Router where
 
 import Component.Header as Header
 import Page.Home as Home
+import Page.Auth as Auth
 import Page.Blog as Blog
 import Page.Blog.Edit as BlogE
 import Page.Biography as Biography
@@ -21,6 +22,7 @@ import Routing.Match (Match, lit, end, root)
 
 data Routes
     = Home
+    | Auth
     | Blog
     | BlogE
     | Budo
@@ -30,6 +32,7 @@ data Routes
 
 instance showRoutes :: Show Routes where
   show Home = "Home"
+  show Auth = "Auth"
   show Blog = "Blog"
   show BlogE = "Blog Edit"
   show Biography = "Biography"
@@ -48,6 +51,7 @@ type Message = String
 type Slot =
     ( header :: Header.Slot Unit
     , home :: Home.Slot Unit
+    , auth :: Auth.Slot Unit
     , blog :: Blog.Slot Unit
     , blogE :: BlogE.Slot Unit
     , biography :: Biography.Slot Unit
@@ -58,6 +62,7 @@ type Slot =
 
 _header = SProxy :: SProxy "header"
 _home = SProxy :: SProxy "home"
+_auth = SProxy :: SProxy "auth"
 _blog = SProxy :: SProxy "blog"
 _blogE = SProxy :: SProxy "blogE"
 _biography = SProxy :: SProxy "biography"
@@ -75,7 +80,8 @@ initialState _ =
     }
 
 routing :: Match Routes
-routing = Blog <$ root <* lit "blog" <* end
+routing = Auth <$ root <* lit "auth" <* end
+      <|> Blog <$ root <* lit "blog" <* end
       <|> BlogE <$ root <* lit "blog" <* lit "edit"
       <|> Biography <$ root <* lit "biography" <* end
       <|> Budo <$ root <* lit "budo" <* end
@@ -105,6 +111,7 @@ render st =
     where
         view :: Routes -> H.ComponentHTML Action Slot Aff
         view Home = slot _home unit Home.ui unit absurd
+        view Auth = slot _auth unit Auth.ui unit absurd
         view Blog = slot _blog unit Blog.ui unit absurd
         view BlogE = slot _blogE unit BlogE.ui unit (Just <<< ChangeRoute)
         view Biography = slot _biography unit Biography.ui unit absurd

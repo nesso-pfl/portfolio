@@ -2,15 +2,17 @@ module Page.Blog where
 
 import Prelude
 import API.Blogs as B
-import Plugin.HalogenR (divC, divC1)
+import Plugin.HalogenR (divC, divCE, divC1, h1C1, h2C1, spanC1, buttonCE1)
 import Plugin.MarkdownIt as MD
 
 import Data.Maybe (Maybe(..))
 import Data.Const (Const)
 import Data.Options ((:=))
+import Data.String.Common (joinWith)
 import Data.Traversable (traverse)
 import Effect.Aff (Aff)
 import Effect (Effect)
+import Effect.Class.Console (log)
 
 import Halogen as H
 import Halogen.HTML (HTML, text)
@@ -19,6 +21,8 @@ import Html.Renderer.Halogen as RH
 
 data Action
     = GetBlogs
+    | AddRead String
+    | GoArticle String
 
 ui :: H.Component HTML (Const Unit) Unit Void Aff
 ui = H.mkComponent
@@ -42,18 +46,18 @@ render st =
     divC "page blog"
         [ divC "left-area"
             [ divC "recent-posts"
-                [ divC1 "title" $ text "Recent Posts"
+                [ h2C1 "title" $ text "Recent Posts"
                 , divC "contents" $ recentPosts st
                 ]
             , divC "recent-comments"
-                [ divC1 "title" $ text "Recent Comments"
+                [ h2C1 "title" $ text "Recent Comments"
                 , divC "contents" $ recentComments st
                 ]
             ]
         , divC "central-area" $ blogMain st
         , divC "right-area"
             [ divC "tags"
-                [ divC1 "title" $ text "Tags"
+                [ h2C1 "title" $ text "Tags"
                 , divC "contents" $ tags st
                 ]
             , divC "search"
@@ -62,17 +66,21 @@ render st =
         ]
 
     where blogMain :: ∀ p. State -> Array (HTML p Action)
-          blogMain = map \b -> divC "blog"
-              [ divC1 "header" ( divC1 "title" $ text b.title )
-              , divC1 "main" ( divC1 "text" $ RH.render_ b.text )
-              , divC "footer"
-                  [ divC "tags" $ map text b.tags
-                  , divC1 "date" $ text $ B.showDate b.date
-                  -- , divC1 "comments" $ text <<< show <<< length $ b.comments
+          blogMain = map \b -> divC "blog md"
+              [ divC "title"
+                  [ h1C1 "content" $ text b.title
+                  , spanC1 "date" $ text $ B.showDate b.date
                   ]
+              , divC1 "tags" $ text (joinWith ", " b.tags)
+              , divC1 "main" ( divC1 "text" $ RH.render_ b.text )
+              , buttonCE1 "btn-read" (AddRead b.id) (text "読んだよ！")
               ]
           recentPosts :: ∀ p. State -> Array (HTML p Action)
-          recentPosts = map \b -> divC "content" []
+          recentPosts = map \b -> divCE "content" (GoArticle b.id)
+              [ spanC1 "title" $ text b.title
+              , divC1 "tags" $ text (joinWith "," b.tags)
+              , divC1 "date" $ text $ B.showDate b.date
+              ]
           recentComments :: ∀ p. State -> Array (HTML p Action)
           recentComments = map \b -> divC "content" []
           tags :: ∀ p. State -> Array (HTML p Action)
@@ -81,9 +89,15 @@ render st =
 handleAction :: Action -> H.HalogenM State Action () Void Aff Unit
 handleAction = case _ of
     GetBlogs -> do
-       blogs <- H.liftAff $ B.getBlog 5
+       blogs <- H.liftAff $ B.getBlog 0
        renderedBlogs <- H.liftEffect $ renderToHtml blogs
        H.put renderedBlogs
+    AddRead id -> do
+       log id
+       pure unit
+    GoArticle id -> do
+       log id
+       pure unit
 
 renderToHtml :: B.Blogs -> Effect B.Blogs
 renderToHtml blogs = do

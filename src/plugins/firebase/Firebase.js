@@ -36,8 +36,8 @@ exports.add_ = function(docData, colRef) {
   return colRef.add(docData);
 };
 
-exports.id_ = function(colRef) {
-  return colRef.id;
+exports.id_ = function(snapshot) {
+  return snapshot.id;
 };
 
 exports.doc_ = function(documentPath, firestore) {
@@ -56,8 +56,8 @@ exports.docs_ = function(querySnapshot) {
   return querySnapshot.docs;
 };
 
-exports.data_ = function(snapShot) {
-  return snapShot.data();
+exports.data_ = function(snapshot) {
+  return snapshot.data();
 };
 
 exports.update_ = function(data, docRef) {
@@ -72,4 +72,16 @@ exports.seconds_ = function(timestamp) {
 
 exports.toDate_ = function(timestamp) {
   return timestamp.toDate();
+};
+
+exports.auth_ = function(app) {
+  return app.auth();
+};
+
+exports.currentUser_ = function(auth) {
+  return auth.currentUser;
+};
+
+exports.createUserWithEmailAndPassword_ = function(auth, email, password) {
+  return auth.createUserWithEmailAndPassword(email, password);
 };
