@@ -19,7 +19,7 @@ module Plugin.HalogenR
 import Prelude
 import Data.Maybe (Maybe(..), fromJust, isJust)
 import Effect (Effect)
-import Halogen.HTML (HTML, ClassName(..), div, text, button, label, input, span, h1, h2, textarea)
+import Halogen.HTML (HTML, ClassName(..), div, text, button, label, input, small, span, h1, h2, textarea)
 import Halogen.HTML.Properties (class_, id_, value, for, placeholder)
 import Halogen.HTML.Core (PropName(..))
 import Halogen.HTML.Events (onClick, onKeyDown, onInput, onValueInput, onValueChange)
@@ -91,6 +91,6 @@ justThen f a =
 
 textForm :: ∀ p i. String -> String -> String -> (String -> i) -> HTML p i
 textForm cls label_ placeholder_ action = divC (cls <> " text-form")
-    [ labelC1 "pretext" label_ $ text label_
+    [ labelC1 "pretext" label_ $ text (label_ <> ": ")
     , input [ id_ label_, placeholder placeholder_, onValueChange $ Just <<< action ]
     ]

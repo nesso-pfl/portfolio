@@ -36,8 +36,8 @@ initialState _ =
 
 render :: State -> H.ComponentHTML Action () Aff
 render _ = divC "page auth"
-    [ textForm "id" "id" "8uR4yhfuIjq3r9UIbfiUh3" IdInput
-    , textForm "password" "password" "8uR4yhfuIjq3r9UIbfiUh3" PasswordInput
+    [ textForm "id" "ID" "8uR4yhfuIjq3r9UIbfiUh3" IdInput
+    , textForm "password" "Password" "8uR4yhfuIjq3r9UIbfiUh3" PasswordInput
     , buttonCE1 "btn-login" Login $ text "ログイン"
     ]
 

@@ -6,6 +6,7 @@ import Page.Auth as Auth
 import Page.Blog as Blog
 import Page.Blog.Edit as BlogE
 import Page.Biography as Biography
+import Page.Biography.Job as BiographyJ
 import Page.Budo as Budo
 import Page.Knowledge as Knowledge
 import Page.Products as Products
@@ -27,6 +28,7 @@ data Routes
     | BlogE
     | Budo
     | Biography
+    | BiographyJ
     | Knowledge
     | Products
 
@@ -36,6 +38,7 @@ instance showRoutes :: Show Routes where
   show Blog = "Blog"
   show BlogE = "Blog Edit"
   show Biography = "Biography"
+  show BiographyJ = "Biography Job"
   show Budo = "Budo"
   show Knowledge = "Knowledge"
   show Products = "Products"
@@ -55,6 +58,7 @@ type Slot =
     , blog :: Blog.Slot Unit
     , blogE :: BlogE.Slot Unit
     , biography :: Biography.Slot Unit
+    , biographyJ :: BiographyJ.Slot Unit
     , budo :: Budo.Slot Unit
     , knowledge :: Knowledge.Slot Unit
     , products :: Products.Slot Unit
@@ -66,6 +70,7 @@ _auth = SProxy :: SProxy "auth"
 _blog = SProxy :: SProxy "blog"
 _blogE = SProxy :: SProxy "blogE"
 _biography = SProxy :: SProxy "biography"
+_biographyJ = SProxy :: SProxy "biographyJ"
 _budo = SProxy :: SProxy "budo"
 _knowledge = SProxy :: SProxy "knowledge"
 _products = SProxy :: SProxy "products"
@@ -84,6 +89,7 @@ routing = Auth <$ root <* lit "auth" <* end
       <|> Blog <$ root <* lit "blog" <* end
       <|> BlogE <$ root <* lit "blog" <* lit "edit"
       <|> Biography <$ root <* lit "biography" <* end
+      <|> BiographyJ <$ root <* lit "biography" <* lit "job" <* end
       <|> Budo <$ root <* lit "budo" <* end
       <|> Products <$ root <* lit "products" <* end
       <|> Knowledge <$ root <* lit "knowledge" <* end
@@ -115,6 +121,7 @@ render st =
         view Blog = slot _blog unit Blog.ui unit absurd
         view BlogE = slot _blogE unit BlogE.ui unit (Just <<< ChangeRoute)
         view Biography = slot _biography unit Biography.ui unit absurd
+        view BiographyJ = slot _biographyJ unit BiographyJ.ui unit absurd
         view Budo = slot _budo unit Budo.ui unit absurd
         view Knowledge = slot _knowledge unit Knowledge.ui unit absurd
         view Products = slot _products unit Products.ui unit absurd

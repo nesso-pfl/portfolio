@@ -58,12 +58,11 @@ getBlog n = do
     liftEffect $ F.docs ss >>= traverse \d -> pure $ (F.data' d) { id = F.id d }
 
 tallyTags :: Blogs -> TagInfo
-tallyTags s = hoho $ concatMap _.tags s
-
-hoho :: Tags -> TagInfo
-hoho tags = case head tags of
-     Just t -> [T.Tuple t (length $ filter ((==) t) tags) ] <> hoho (filter ((/=) t) tags)
-     Nothing -> []
+tallyTags = foldTags <<< concatMap _.tags
+    where foldTags :: Tags -> TagInfo
+          foldTags tags = case head tags of
+              Just t -> [T.Tuple t (length $ filter ((==) t) tags) ] <> foldTags (filter ((/=) t) tags)
+              Nothing -> []
 
 showDate :: F.Timestamp -> String
 showDate t = case D.toDateTime $ F.toDate t of
