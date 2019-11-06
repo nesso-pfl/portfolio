@@ -1,16 +1,14 @@
 module Page.Biography.Job where
 
 import Prelude
-import Plugin.HalogenR (divC, divCE, divC1, h1C1, h2C1, spanC1, buttonCE1)
+import Plugin.HalogenR (divC, divC1, h1C1, h2C1, spanC1)
 
 import Data.Const (Const)
 import Effect.Aff (Aff)
-import Effect.Class.Console (log)
 
 import Halogen as H
 import Halogen.HTML (HTML, text)
 import Halogen.HTML.Elements (br_)
-import Html.Renderer.Halogen as RH
 
 
 ui :: H.Component HTML (Const Unit) Unit Void Aff
@@ -60,7 +58,7 @@ render _ =
                             , br_
                             , text "JavaScript(TypeScript*, Elm, PureScript)"
                             , br_
-                            , text "Python, Java*, PHP*, Haskell*, C*" ]
+                            , text "Python, Java*, PHP*, Haskell, C*" ]
                         , divC1 "dt" $ text "FW等:"
                         , divC "dd"
                             [ divC "fw"

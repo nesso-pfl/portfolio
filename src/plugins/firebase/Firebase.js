@@ -82,6 +82,6 @@ exports.currentUser_ = function(auth) {
   return auth.currentUser;
 };
 
-exports.createUserWithEmailAndPassword_ = function(auth, email, password) {
-  return auth.createUserWithEmailAndPassword(email, password);
+exports.signInUserWithEmailAndPassword_ = function(auth, email, password) {
+  return auth.signInUserWithEmailAndPassword(email, password);
 };

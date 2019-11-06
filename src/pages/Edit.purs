@@ -9,7 +9,7 @@ import Plugin.Vim (addKeydownEvent)
 
 import Data.Options ((:=))
 import Data.Const (Const)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), isJust)
 import Data.String.Common (null)
 import Effect.Aff (Aff)
 import Effect.Class.Console (log)
@@ -125,15 +125,23 @@ handleAction = case _ of
         H.raise "/blog"
     -- If using ace editor, switch initialize to this
     InitAce -> do
-        editor <- H.liftEffect $ edit "editor-ace" ace
-        -- _ <- H.liftEffect $ AC.set AC.basePath "path"
-        -- H.liftEffect $ AE.setKeyboardHandler "ace/keyboard/vim" editor
-        H.modify_ $ _ { editor = Just editor }
-        doc <- H.liftEffect $ getSession editor >>= AS.getDocument
-        void $ H.subscribe $ ES.effectEventSource \emitter -> do
-            AD.onChange doc (\_ -> ES.emit emitter $ InputText)
-            pure mempty
-        pure unit
+        signInInfo <- H.liftEffect $ F.initializeApp F.firebaseConfig Nothing >>= F.auth >>= F.currentUser
+        case signInInfo of
+            Nothing -> do
+                H.liftEffect $ log "oh no"
+                pure unit
+            Just user -> do
+                -- H.liftEffect $ log user
+                H.liftEffect $ log "hoho"
+                editor <- H.liftEffect $ edit "editor-ace" ace
+                -- _ <- H.liftEffect $ AC.set AC.basePath "path"
+                -- H.liftEffect $ AE.setKeyboardHandler "ace/keyboard/vim" editor
+                H.modify_ $ _ { editor = Just editor }
+                doc <- H.liftEffect $ getSession editor >>= AS.getDocument
+                void $ H.subscribe $ ES.effectEventSource \emitter -> do
+                    AD.onChange doc (\_ -> ES.emit emitter $ InputText)
+                    pure mempty
+                pure unit
     -- If using my vim plugin, switch initialize to this
     AddKeyEvent -> do
         H.liftEffect addKeydownEvent

@@ -2,9 +2,11 @@ module Page.Auth where
 
 import Prelude
 import Data.Const (Const)
+import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Effect.Class.Console (log)
 import Plugin.HalogenR (divC, buttonCE1, textForm)
+import Plugin.Firebase as F
 
 import Halogen as H
 import Halogen.HTML (HTML, text)
@@ -48,5 +50,7 @@ handleAction = case _ of
     PasswordInput s -> do
         H.modify_ $ _ { password = s }
     Login -> do
-        log "hoho"
+        st <- H.get
+        auth <- H.liftEffect $ F.initializeApp F.firebaseConfig Nothing >>= F.auth
+        _ <- H.liftAff $ F.signInUserWithEmailAndPassword auth st.id st.password
         pure unit

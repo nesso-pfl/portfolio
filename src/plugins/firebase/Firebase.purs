@@ -26,6 +26,11 @@ module Plugin.Firebase
   , now
   , seconds
   , toDate
+  , Auth
+  , auth
+  , currentUser
+  , UserCredential
+  , signInUserWithEmailAndPassword
   ) where
 
 
@@ -36,6 +41,7 @@ import Data.Array (null)
 import Data.JSDate as D
 import Data.Options as O
 import Data.Maybe (Maybe(..))
+import Data.Nullable (Nullable(..), toMaybe)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -164,9 +170,9 @@ auth = runEffectFn1 auth_
 foreign import auth_ :: EffectFn1 FirebaseApp Auth
 
 currentUser :: Auth -> Effect (Maybe String)
-currentUser = runEffectFn1 currentUser_
-foreign import currentUser_ :: EffectFn1 Auth (Maybe String)
+currentUser a = toMaybe <$> runEffectFn1 currentUser_ a
+foreign import currentUser_ :: EffectFn1 Auth (Nullable String)
 
-createUserWithEmailAndPassword :: Auth -> String -> String -> Aff UserCredential
-createUserWithEmailAndPassword a b c = toAffE $ runEffectFn3 createUserWithEmailAndPassword_ a b c
-foreign import createUserWithEmailAndPassword_ :: EffectFn3 Auth String String (Promise UserCredential)
+signInUserWithEmailAndPassword :: Auth -> String -> String -> Aff UserCredential
+signInUserWithEmailAndPassword a b c = toAffE $ runEffectFn3 signInUserWithEmailAndPassword_ a b c
+foreign import signInUserWithEmailAndPassword_ :: EffectFn3 Auth String String (Promise UserCredential)

@@ -9,6 +9,7 @@
   "scripts": {
     "serve": "parcel public/index.html -p 80",
     "build": "spago bundle-app -t public/index.js",
+    "deploy": "parcel build public/index.html && firebase deploy",
     "watch": "spago bundle-app -w"
   },
   "dependencies": {
