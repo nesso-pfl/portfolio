@@ -20,7 +20,6 @@ contents =
     [ "Home"
     , "Blog"
     , "Knowledge"
-    , "Biography"
     , "Products"
     , "Budo"
     ]

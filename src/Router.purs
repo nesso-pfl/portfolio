@@ -5,7 +5,6 @@ import Page.Home as Home
 import Page.Auth as Auth
 import Page.Blog as Blog
 import Page.Blog.Edit as BlogE
-import Page.Biography as Biography
 import Page.Biography.Job as BiographyJ
 import Page.Budo as Budo
 import Page.Knowledge as Knowledge
@@ -27,7 +26,6 @@ data Routes
     | Blog
     | BlogE
     | Budo
-    | Biography
     | BiographyJ
     | Knowledge
     | Products
@@ -37,7 +35,6 @@ instance showRoutes :: Show Routes where
   show Auth = "Auth"
   show Blog = "Blog"
   show BlogE = "Blog Edit"
-  show Biography = "Biography"
   show BiographyJ = "Biography Job"
   show Budo = "Budo"
   show Knowledge = "Knowledge"
@@ -57,7 +54,6 @@ type Slot =
     , auth :: Auth.Slot Unit
     , blog :: Blog.Slot Unit
     , blogE :: BlogE.Slot Unit
-    , biography :: Biography.Slot Unit
     , biographyJ :: BiographyJ.Slot Unit
     , budo :: Budo.Slot Unit
     , knowledge :: Knowledge.Slot Unit
@@ -88,7 +84,6 @@ routing :: Match Routes
 routing = Auth <$ root <* lit "auth" <* end
       <|> Blog <$ root <* lit "blog" <* end
       <|> BlogE <$ root <* lit "blog" <* lit "edit"
-      <|> Biography <$ root <* lit "biography" <* end
       <|> BiographyJ <$ root <* lit "biography" <* lit "job" <* end
       <|> Budo <$ root <* lit "budo" <* end
       <|> Products <$ root <* lit "products" <* end
@@ -120,7 +115,6 @@ render st =
         view Auth = slot _auth unit Auth.ui unit absurd
         view Blog = slot _blog unit Blog.ui unit absurd
         view BlogE = slot _blogE unit BlogE.ui unit (Just <<< ChangeRoute)
-        view Biography = slot _biography unit Biography.ui unit absurd
         view BiographyJ = slot _biographyJ unit BiographyJ.ui unit absurd
         view Budo = slot _budo unit Budo.ui unit absurd
         view Knowledge = slot _knowledge unit Knowledge.ui unit absurd
