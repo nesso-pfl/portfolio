@@ -1,5 +1,6 @@
 module Plugin.HalogenR 
-    ( divC
+    ( setTitle
+    , divC
     , divCE
     , divC1
     , spanC1
@@ -16,21 +17,24 @@ module Plugin.HalogenR
     )
     where
 
-import Prelude
+import Prelude (Unit, (>>=), ($), (<>), (<<<), (>>>), bind, pure, unit)
 import Data.Maybe (Maybe(..), fromJust, isJust)
 import Effect (Effect)
-import Halogen.HTML (HTML, ClassName(..), div, text, button, label, input, small, span, h1, h2, textarea)
-import Halogen.HTML.Properties (class_, id_, value, for, placeholder)
-import Halogen.HTML.Core (PropName(..))
-import Halogen.HTML.Events (onClick, onKeyDown, onInput, onValueInput, onValueChange)
+import Effect.Uncurried (EffectFn1, runEffectFn1)
+import Halogen.HTML (HTML, ClassName(..), div, text, button, label, input, span, h1, h2, textarea)
+import Halogen.HTML.Properties (class_, id_, for, placeholder)
+import Halogen.HTML.Events (onClick, onKeyDown, onValueInput, onValueChange)
 import Web.DOM.NonElementParentNode (getElementById)
 import Web.HTML (window)
 import Web.HTML.Window (document)
 import Web.HTML.HTMLDocument (toNonElementParentNode)
-import Web.HTML.HTMLElement (HTMLElement, blur, focus, fromElement)
+import Web.HTML.HTMLElement (HTMLElement, fromElement)
 import Partial.Unsafe (unsafePartial)
-import Web.Event.Internal.Types (Event)
 import Web.UIEvent.KeyboardEvent (KeyboardEvent)
+
+setTitle :: String -> Effect Unit
+setTitle = runEffectFn1 setTitle_
+foreign import setTitle_ :: EffectFn1 String Unit
 
 divC :: ∀ p i. String -> Array (HTML p i) -> HTML p i
 divC cls es = div [ class_ $ ClassName cls ] es

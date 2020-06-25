@@ -2,7 +2,7 @@ module Page.Blog where
 
 import Prelude
 import API.Blogs as B
-import Plugin.HalogenR (divC, divCE, divC1, h1C1, h2C1, spanC1, buttonCE1)
+import Plugin.HalogenR (setTitle, divC, divCE, divC1, h1C1, h2C1, spanC1, buttonCE1)
 import Plugin.MarkdownIt as MD
 
 import Data.Maybe (Maybe(..))
@@ -89,6 +89,7 @@ render st =
 handleAction :: Action -> H.HalogenM State Action () Void Aff Unit
 handleAction = case _ of
     GetBlogs -> do
+       H.liftEffect $ setTitle "ブログ - nesso-pfl"
        blogs <- H.liftAff $ B.getBlog 0
        renderedBlogs <- H.liftEffect $ renderToHtml blogs
        H.put renderedBlogs
