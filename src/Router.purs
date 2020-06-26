@@ -6,9 +6,6 @@ import Page.Auth as Auth
 import Page.Blog as Blog
 import Page.Blog.Edit as BlogE
 import Page.Biography.Job as BiographyJ
-import Page.Budo as Budo
-import Page.Knowledge as Knowledge
-import Page.Products as Products
 
 import Control.Alt ((<|>))
 import Data.Maybe (Maybe(..))
@@ -25,10 +22,7 @@ data Routes
     | Auth
     | Blog
     | BlogE
-    | Budo
     | BiographyJ
-    | Knowledge
-    | Products
 
 instance showRoutes :: Show Routes where
   show Home = "Home"
@@ -36,9 +30,6 @@ instance showRoutes :: Show Routes where
   show Blog = "Blog"
   show BlogE = "Blog Edit"
   show BiographyJ = "Biography Job"
-  show Budo = "Budo"
-  show Knowledge = "Knowledge"
-  show Products = "Products"
 
 data Action
     = ChangeRoute String
@@ -55,9 +46,6 @@ type Slot =
     , blog :: Blog.Slot Unit
     , blogE :: BlogE.Slot Unit
     , biographyJ :: BiographyJ.Slot Unit
-    , budo :: Budo.Slot Unit
-    , knowledge :: Knowledge.Slot Unit
-    , products :: Products.Slot Unit
     )
 
 _header = SProxy :: SProxy "header"
@@ -67,9 +55,6 @@ _blog = SProxy :: SProxy "blog"
 _blogE = SProxy :: SProxy "blogE"
 _biography = SProxy :: SProxy "biography"
 _biographyJ = SProxy :: SProxy "biographyJ"
-_budo = SProxy :: SProxy "budo"
-_knowledge = SProxy :: SProxy "knowledge"
-_products = SProxy :: SProxy "products"
 
 type State = 
     { currentPage :: Routes
@@ -85,9 +70,6 @@ routing = Auth <$ root <* lit "auth" <* end
       <|> Blog <$ root <* lit "blog" <* end
       <|> BlogE <$ root <* lit "blog" <* lit "edit"
       <|> BiographyJ <$ root <* lit "biography" <* lit "job" <* end
-      <|> Budo <$ root <* lit "budo" <* end
-      <|> Products <$ root <* lit "products" <* end
-      <|> Knowledge <$ root <* lit "knowledge" <* end
       <|> Home <$ root
 
 
@@ -116,9 +98,6 @@ render st =
         view Blog = slot _blog unit Blog.ui unit absurd
         view BlogE = slot _blogE unit BlogE.ui unit (Just <<< ChangeRoute)
         view BiographyJ = slot _biographyJ unit BiographyJ.ui unit absurd
-        view Budo = slot _budo unit Budo.ui unit absurd
-        view Knowledge = slot _knowledge unit Knowledge.ui unit absurd
-        view Products = slot _products unit Products.ui unit absurd
 
 handleAction :: Action -> H.HalogenM State Action Slot Message Aff Unit
 handleAction = case _ of

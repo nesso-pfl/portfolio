@@ -2,26 +2,18 @@ module Component.Header where
 
 import Plugin.HalogenR
 
-import Prelude
+import Prelude (Unit, Void, const, map, unit, (#), ($), (<>))
 import Data.Const (Const)
-import Data.Maybe (Maybe(..))
 import Data.String.Common (toLower)
-import Effect.Aff (Aff, launchAff)
-import Effect.Class (liftEffect)
-import Effect.Class.Console (log)
+import Effect.Aff (Aff)
 import Halogen as H
-import Halogen.HTML (ClassName(..))
-import Halogen.HTML (HTML, div, header, link, text)
+import Halogen.HTML (ClassName(..), HTML, header, link, text)
 import Halogen.HTML.Properties as HP
-import Halogen.HTML.Events as HE
 
 contents :: Array String
 contents =
     [ "Home"
     , "Blog"
-    , "Knowledge"
-    , "Products"
-    , "Budo"
     ]
 
 data Action
