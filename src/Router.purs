@@ -1,5 +1,6 @@
 module Router where
 
+import Component.Base as Base
 import Component.Header as Header
 import Page.Home as Home
 import Page.Auth as Auth
@@ -13,7 +14,7 @@ import Data.Symbol (SProxy(..))
 import Effect (Effect)
 import Effect.Aff (Aff, launchAff)
 import Halogen as H
-import Halogen.HTML (HTML, div_, slot)
+import Halogen.HTML (HTML, slot)
 import Prelude
 import Routing.Match (Match, lit, end, root)
 
@@ -86,7 +87,7 @@ ui = H.mkComponent
 
 render :: State -> H.ComponentHTML Action Slot Aff
 render st =
-    div_
+    Base.base
         [ slot _header unit Header.ui unit (Just <<< ChangeRoute)
         , view st.currentPage
         ]

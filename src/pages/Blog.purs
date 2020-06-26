@@ -94,10 +94,8 @@ handleAction = case _ of
        renderedBlogs <- H.liftEffect $ renderToHtml blogs
        H.put renderedBlogs
     AddRead id -> do
-       log id
        pure unit
     GoArticle id -> do
-       log id
        pure unit
 
 renderToHtml :: B.Blogs -> Effect B.Blogs
